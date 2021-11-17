@@ -16,4 +16,5 @@ This was all built on a raspberry pi. I started with Ubuntu Server 20.04 to ease
 * `cd catkin_ws`
 * `sudo apt install build-essential`
 * `catkin_make`
-* `clone this repo into the src directory`
+* `source devel/setup.bash`
+* clone this repo into the src directory
