@@ -1,4 +1,4 @@
-This was all built on a raspberry pi. I started with Ubuntu Server 20.04 to ease the load of installing ROS (currently Raspbian is on bullseye, which no version of ROS officially supports...). I set up dependencies as follows:
+This was all built on a raspberry pi. This was all done on 64bit Buster image, found [here](https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/)
 
 # Install ROS
 * `sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main" > /etc/apt/sources.list.d/ros-latest.list'`
@@ -7,14 +7,13 @@ This was all built on a raspberry pi. I started with Ubuntu Server 20.04 to ease
 * `sudo apt install ros-noetic-ros-core`
 * `echo "source /opt/ros/noetic/setup.bash" >> ~/.bashrc`
 
-# Install GPIO libraries
-* `sudo apt-get install python3-pigpio python3-gpiozero`
-* Install pigpio from source, [instructions here](https://abyz.me.uk/rpi/pigpio/download.html)
+# Enable GPIO libraries
+* `sudo systemctl enable pigpiod.service`
 
-# Setup libraries
+# Setup ROS
 * `mkdir ~/catkin_ws/src`
 * `cd catkin_ws`
 * `sudo apt install build-essential`
 * `catkin_make`
 * `source devel/setup.bash`
-* clone this repo into the src directory
+* Clone this repo into the src directory
