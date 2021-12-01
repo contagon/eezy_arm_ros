@@ -11,7 +11,8 @@ def listen_jts(data):
     val = [data.x, data.y, data.z]
     rospy.loginfo(f"Setting jts to {val}")
     for i in range(3):
-        servo[i].value = (val[i]*scale[i] + offsets[i])/90
+        clipped = max(lower_limits[i], min(val[i], upper_limits[i]))
+        servo[i].value = (clipped*scale[i] + offsets[i])/90
     
 # Let closed = true
 def listen_ee(data):
@@ -34,6 +35,8 @@ if __name__ == "__main__":
     
     # This should be universal
     scale = [2, 1, -1]
+    lower_limits = [-45, -40, -25]
+    upper_limits = [ 45,  40,  50]
 
     # These are the parameters for the MG996R
     factory = PiGPIOFactory()
