@@ -28,6 +28,6 @@ $ cd catkin_ws/
 $ catkin_make
 $ source devel/setup.bash
 # Clone this repo into the src directory
-cd src/
-git clone git@github.com:contagon/eezy_arm_ros.git
+$ cd src/
+$ git clone git@github.com:contagon/eezy_arm_ros.git
 ```
