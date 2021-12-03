@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
 import numpy as np
-from scipy.spatial.transform import Rotation as scipy_R
+#from scipy.spatial.transform import Rotation as scipy_R
 
 # ROS imports
 import rospy
 from geometry_msgs.msg import Vector3, Pose, Point, Quaternion
 
-NUM_JOINTS = 4
+NUM_JOINTS = 3
 
 
 def deg2rad(deg : float) -> float:
@@ -109,6 +109,8 @@ class EezyBotArm:
         self._l3 = 147  # mm
         self._l4 = 87  # mm
 
+        self.base_to_first_joint = translate_se3(np.array([0, 0, 50.]))
+
         # Set up ROS publishers and subscribers
         self.fk_pub = rospy.Publisher("/end_effector_pose", Pose, queue_size=10)
         self.q_subscriber = rospy.Subscriber("/q_des", Vector3, self.fk_callback)
@@ -155,8 +157,9 @@ class EezyBotArm:
         t.z = T_ee[2,3]
 
         quat = Quaternion()
-        r = scipy_R.from_matrix(T_ee[0:3, 0:3])
-        r = r.as_quat()
+        #r = scipy_R.from_matrix(T_ee[0:3, 0:3])
+        #r = r.as_quat()
+        r = np.zeros((1,4))  # FIXME
         quat.x = r[0][0]
         quat.y = r[0][1]
         quat.z = r[0][2]
@@ -182,7 +185,17 @@ class EezyBotArm:
         Returns:
             np.array: 4x4 transformation matrix from the 'starting_joint' to the 'ending_frame'
         """
-        T = np.eye(4)
+        if base == True and starting_link == 0:
+            T = self.base_to_first_joint
+        else:
+            T = np.eye(4) 
+
+        for i in range(starting_link, ending_link):
+            T = T @ self.compute_A_matrix(q, i)
+
+        if ee == True and ending_link == NUM_JOINTS:
+            T = T @ self.compute_A_matrix(q, 3)
+
         return T
 
 if __name__ == "__main__":
