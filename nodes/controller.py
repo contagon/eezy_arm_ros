@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import rospy
+from rospy.exceptions import ROSInterruptException
 from std_msgs.msg import Bool
 from eezy_arm_ros.msg import Joints, JointsArray
 from gpiozero import Servo
@@ -33,13 +34,17 @@ class MotorController:
 
         # These are the parameters for the MG996R
         factory = PiGPIOFactory()
-        self.servo = [Servo(p, min_pulse_width=0.5/1000,
+        self.servos = [Servo(p, min_pulse_width=0.5/1000,
                             max_pulse_width=2.5/1000,
                             initial_value=None,
                             pin_factory=factory) for p in self.ports]
         # move to zero config
         self.command_servos(self.curr_q)
 
+    def tearDown(self):
+        """Stops the servos when exiting"""
+        for servo in self.servos:
+            servo.detach()
 
     ##################################################
     #             HANDLE SERVO CONTROL               #
@@ -49,7 +54,7 @@ class MotorController:
         self.curr_q = val
         for i in range(3):
             clipped = max(self.lower_limits[i], min(val[i], self.upper_limits[i]))
-            self.servo[i].value = (clipped*self.scale[i] + self.offsets[i])/90
+            self.servos[i].value = (clipped*self.scale[i] + self.offsets[i])/90
         
         # Send commanded q
         self.q_pub.publish(Joints(*self.curr_q))
@@ -100,14 +105,17 @@ class MotorController:
 
         if des_closed:
             rospy.loginfo("Closing claw")
-            self.servo[-1].value = self.ee_angle_closed / 90.0
+            self.servos[-1].value = self.ee_angle_closed / 90.0
         else:
             rospy.loginfo(f"Opening claw")
-            self.servo[-1].value = self.ee_angle_open / 90.0
+            self.servos[-1].value = self.ee_angle_open / 90.0
 
 
 
 if __name__ == "__main__":
-    rospy.init_node("controller")
-    MotorController()
-    rospy.spin()
+    try:
+        rospy.init_node("controller")
+        motor_controller = MotorController()
+        rospy.spin()
+    except ROSInterruptException:
+        motor_controller.tearDown()

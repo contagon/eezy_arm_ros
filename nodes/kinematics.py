@@ -183,10 +183,10 @@ class EezyBotArm:
         """
         J = np.zeros((6,3))
 
-        Pe = self.forward_kinematics(q, ending_link=idx, base=base, ee=ee)[:3,3]
+        Pe = self.forward_kinematics(q, ending_frame=idx, base=base, ee=ee)[:3,3]
 
         for i in range(idx):
-            f = self.forward_kinematics(q, ending_link=i, base=base, ee=ee)
+            f = self.forward_kinematics(q, ending_frame=i, base=base, ee=ee)
             zi = f[:3,2]
 
             J[0:3, i] = np.cross(zi, Pe-f[:3,3])
@@ -247,11 +247,14 @@ class EezyBotArm:
 
         quat = Quaternion()
         r = scipy_R.from_matrix(T_ee[0:3, 0:3])
+        rospy.loginfo(f'T_ee[0:3, 0:3]: {T_ee[0:3, 0:3]}')
+        rospy.loginfo(f'r as matrix: {r}')
         r = r.as_quat()
-        quat.x = r[0][0]
-        quat.y = r[0][1]
-        quat.z = r[0][2]
-        quat.w = r[0][3]
+        rospy.loginfo(f'r as quaternion: {r}')
+        quat.x = r[0]
+        quat.y = r[1]
+        quat.z = r[2]
+        quat.w = r[3]
         
         msg_out = Pose()
         msg_out.position = t
