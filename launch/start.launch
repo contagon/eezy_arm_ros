@@ -2,7 +2,7 @@
 
   <group ns="arm1">
     <node pkg="eezy_arm_ros" name="controller" type="controller.py"/>
-    <node pkg="eezy_arm_ros" name="ik" type="ik.py"/>
+    <node pkg="eezy_arm_ros" name="kinematics" type="kinematics.py"/>
 
     <rosparam param="ports">[2, 4, 17, 22]</rosparam>
     <rosparam param="jt_offsets">[0, 5, -8]</rosparam>
