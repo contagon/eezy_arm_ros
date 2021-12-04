@@ -31,3 +31,19 @@ $ source devel/setup.bash
 cd src/
 git clone git@github.com:contagon/eezy_arm_ros.git
 ```
+
+## Build Scipy from source
+```shell
+# Install necessary libraries/packages
+$ sudo apt-get install gcc g++ gfortran python3-dev libopenblas-dev liblapack-dev
+$ pip3 install pybind11 cython pythran
+# Download and build
+$ cd ~/
+$ git clone git@github.com:scipy/scipy.git
+$ cd scipy/
+$ git checkout v1.7.0 # If using Python 3.7
+# Need to init submodules (particularly Boost)
+$ git submodule update --init --recursive
+$ python3 setup.py install --user   # Installs to your home directory
+# Grab a drink, it will be a while ;)
+```
