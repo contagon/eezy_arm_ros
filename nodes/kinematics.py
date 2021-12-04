@@ -247,10 +247,7 @@ class EezyBotArm:
 
         quat = Quaternion()
         r = scipy_R.from_matrix(T_ee[0:3, 0:3])
-        rospy.loginfo(f'T_ee[0:3, 0:3]: {T_ee[0:3, 0:3]}')
-        rospy.loginfo(f'r as matrix: {r}')
         r = r.as_quat()
-        rospy.loginfo(f'r as quaternion: {r}')
         quat.x = r[0]
         quat.y = r[1]
         quat.z = r[2]
@@ -260,7 +257,7 @@ class EezyBotArm:
         msg_out.position = t
         msg_out.orientation = quat
 
-        self.fk_publisher.publish(msg_out)
+        self.fk_pub.publish(msg_out)
 
     def ik_callback(self, data : Vector3):
         """ROS callback for computing inverse kinematics. Subscribes to the desired position.
