@@ -42,3 +42,12 @@ Then, to send a desired position or joint angle, run one of the following comman
 $ rostopic pub -1 /arm1/p_des geometry_msgs/Vector3 -- 200 -100 250
 $ rostopic pub -1 /arm1/q_des eezy_arm_ros/Joints -- 0 0 0
 ```
+There's a number of predefined trajectories you can send as well! Try either one of the following scripts
+```shell
+$ rosrun eezy_arm_ros run_axis.py y
+$ rosrun eezy_arm_ros run_figure_eight.py
+```
+To speed up or slow it down, set the `max_accel` rosparam either in `start.launch` or via the command
+```shell
+$ rosparam set /arm1/max_accel 1000.0
+```

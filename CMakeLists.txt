@@ -165,6 +165,8 @@ include_directories(
 catkin_install_python(PROGRAMS
   nodes/controller.py
   nodes/kinematics.py
+  scripts/run_axis.py
+  scripts/run_figure_eight.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 

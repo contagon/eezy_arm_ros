@@ -112,14 +112,14 @@ class EezyBotArm:
         self.curr_q = np.zeros(3)
 
         # Set up ROS publishers and subscribers
-        self.q_subscriber = rospy.Subscriber("/q", Joints, self.fk_callback)
-        self.fk_pub = rospy.Publisher("/end_effector_pose", Pose, queue_size=10)
+        self.q_subscriber = rospy.Subscriber("q", Joints, self.fk_callback)
+        self.fk_pub = rospy.Publisher("end_effector_pose", Pose, queue_size=10)
 
-        self.ik_sub = rospy.Subscriber("/p_des", Vector3, self.ik_callback)
-        self.ik_traj_sub = rospy.Subscriber("/p_des_traj", Vector3Array, self.ik_traj_callback)
+        self.ik_sub = rospy.Subscriber("p_des", Vector3, self.ik_callback)
+        self.ik_traj_sub = rospy.Subscriber("p_des_traj", Vector3Array, self.ik_traj_callback)
 
-        self.q_des_pub = rospy.Publisher("/q_des", Joints, queue_size=10)
-        self.q_des_traj_pub = rospy.Publisher("/q_des_traj", JointsArray, queue_size=10)
+        self.q_des_pub = rospy.Publisher("q_des", Joints, queue_size=10)
+        self.q_des_traj_pub = rospy.Publisher("q_des_traj", JointsArray, queue_size=10)
 
     def compute_A_matrix(self, q : list, joint_idx : int) -> np.array:
         """Computes the transformation matrix from the given joint to the end of the link. With the 
@@ -200,7 +200,7 @@ class EezyBotArm:
 
         return J
 
-    def ik(self, p_des : list, q0 : list, max_iter=1000, tol=1e-6, K=5, method="damped") -> np.array:
+    def ik(self, p_des : list, q0 : list, max_iter=1000, tol=1e-3, K=5, method="damped") -> np.array:
         """Returns the required configuration q to be at position q_des.
 
         Args:
@@ -243,7 +243,7 @@ class EezyBotArm:
         Args:
             data (Joints): ROS message containing the current joint angles
         """
-        q = [msg.q1, msg.q2, msg.q3]
+        q = [data.q1, data.q2, data.q3]
         T_ee = self.forward_kinematics(q)
         
         t = Point()
@@ -267,7 +267,7 @@ class EezyBotArm:
         self.fk_pub.publish(msg_out)
 
     def ik_callback(self, data : Vector3):
-        """ROS callback for computing inverse kinematics. Subscribes to the current ee position.
+        """ROS callback for computing inverse kinematics. Subscribes to the desired position.
 
         Args:
             data (Vector3): ROS message containing the x,y,z coordinate
@@ -278,8 +278,27 @@ class EezyBotArm:
         msg = Joints(q[0], q[1], q[2])
         self.q_des_pub.publish(msg)
 
-    def ik_traj_callback(self, data):
-        pass
+    def ik_traj_callback(self, data : Vector3Array):
+        """ROS callback for computing a trajectory of inverse kinematics. Subscribes to 
+        desired position trajectory.
+
+        Args:
+            data (Vector3): ROS message containing the x,y,z coordinate
+        """
+        rospy.loginfo("HERE!!!!")
+        # set data
+        p_des = np.array([[p.x, p.y, p.z] for p in data.data])
+        qs = np.zeros((len(p_des), NUM_JOINTS))
+
+        # jumpstart first one
+        qs[0] = self.ik(p_des[0], self.curr_q)
+        for i in range(1, len(p_des)):
+            qs[i] = self.ik(p_des[i], qs[i-1])
+
+        # stick into msg
+        msg = JointsArray([Joints(*q) for q in qs])
+        rospy.loginfo("Sending trajectory")
+        self.q_des_traj_pub.publish(msg)
 
 if __name__ == "__main__":
     rospy.init_node("kinematics")

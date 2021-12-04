@@ -45,7 +45,7 @@ class MotorController:
     #             HANDLE SERVO CONTROL               #
     ##################################################
     def command_servos(self, val):
-        """Process joint angles and send to servo"""
+        """Process joint angles, sends to servo, and publishes current q"""
         self.curr_q = val
         for i in range(3):
             clipped = max(self.lower_limits[i], min(val[i], self.upper_limits[i]))
@@ -81,12 +81,14 @@ class MotorController:
     def listen_jts_traj(self, data):
         """Callback that listens for a desired joint position."""
         qs = np.array([[q.q1, q.q2, q.q3] for q in data.data])
+        # add in current q
         qs = np.vstack((self.curr_q, qs))
         rospy.loginfo(f"Moving jts through trajectory")
         self.command_traj(qs)
 
     def listen_jts(self, data):
         """Callback that listens for a desired joint position."""
+        # add in current q
         qs = np.array([self.curr_q, [data.q1, data.q2, data.q3]])
         rospy.loginfo(f"Moving jts to {qs[-1]}")
         self.command_traj(qs)
