@@ -100,10 +100,10 @@ class MotorController:
 
         if des_closed:
             rospy.loginfo("Closing claw")
-            servo[-1].value = self.ee_angle_closed / 90.0
+            self.servo[-1].value = self.ee_angle_closed / 90.0
         else:
             rospy.loginfo(f"Opening claw")
-            servo[-1].value = self.ee_angle_open / 90.0
+            self.servo[-1].value = self.ee_angle_open / 90.0
 
 
 
