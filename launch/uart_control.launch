@@ -1,0 +1,17 @@
+<launch>
+
+  <group ns="arm1">
+    <node pkg="eezy_arm_ros" name="controller" type="controller.py"/>
+    <node pkg="eezy_arm_ros" name="kinematics" type="kinematics.py"/>
+    <node pkg="eezy_arm_ros" name="uart_control" type="uart_control.py"/>
+
+    <rosparam param="ports">[19, 13, 20, 12]</rosparam>
+    <rosparam param="com_port">"/dev/ttyS0"</rosparam>
+    <rosparam param="baud_rate">9600</rosparam>
+    <rosparam param="jt_offsets">[0, 5, -8]</rosparam>
+    <rosparam param="ee_open">0.0</rosparam>
+    <rosparam param="ee_closed">-90.0</rosparam>
+    <rosparam param="max_accel">1000.0</rosparam>
+  </group>
+
+</launch>
