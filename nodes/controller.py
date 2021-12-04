@@ -21,7 +21,10 @@ class MotorController:
         self.curr_q = np.zeros(3)
         
         # These should be universal
+        # Scale used to take into account gearing ratio, and servo 
+        # mount orientation
         self.scale = [2, 1, -1]
+        # Limits are based on the "scaled" angles
         self.lower_limits = [-45, -40, -25]
         self.upper_limits = [ 45,  40,  50]
         self.dt = 1.0/60
