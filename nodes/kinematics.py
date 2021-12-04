@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import numpy as np
-#from scipy.spatial.transform import Rotation as scipy_R
+from scipy.spatial.transform import Rotation as scipy_R
 
 # ROS imports
 import rospy
@@ -107,12 +107,10 @@ class EezyBotArm:
         self._l3 = 147  # mm
         self._l4 = 87  # mm
 
-        self.base_to_first_joint = translate_se3(np.array([0, 0, 0]))
-
         self.curr_q = np.zeros(3)
 
         # Set up ROS publishers and subscribers
-        self.q_subscriber = rospy.Subscriber("q", Joints, self.fk_callback)
+        self.q_sub = rospy.Subscriber("q", Joints, self.fk_callback)
         self.fk_pub = rospy.Publisher("end_effector_pose", Pose, queue_size=10)
 
         self.ik_sub = rospy.Subscriber("p_des", Vector3, self.ik_callback)
@@ -128,13 +126,12 @@ class EezyBotArm:
         joints 1 and 2
 
         Args:
-            q (list): Joint angles
+            q (list): Joint angles in degrees
             joint_idx (int): Joint index of the robot
 
         Returns:
             np.array: 4x4 transformation matrix
         """
-        # TODO: Check the angles for radians or degrees
         if joint_idx == 0:
             A = rotate_z_se3(q[0]) @ translate_se3(np.array([0, 0, self._l1])) @ rotate_x_se3(-np.pi/2, radians=True)
         elif joint_idx == 1:
@@ -148,29 +145,26 @@ class EezyBotArm:
 
         return A
 
-    def forward_kinematics(self, q : list, starting_link=0, ending_link=NUM_JOINTS, base=True, ee=True) -> np.array:
+    def forward_kinematics(self, q : list, starting_link=0, ending_frame=NUM_JOINTS, base=True, ee=True) -> np.array:
         """Returns the transformation matrix from one link to another given a q.
            Defaults to calculating fk from the base to the end effector.
 
         Args:
             q (list): Joint angles in degrees.
             starting_link (int, optional): The link from which to calculate fk. Defaults to 0 (base frame).
-            ending_frame (int, optional): The link to which we want fk calcualted. Defaults to NUM_JOINTS (end effector frame).
+            ending_frame (int, optional): The link to which we want fk calculated. Defaults to NUM_JOINTS (end effector frame).
             base (bool, optional): If true and starting index is 0, then base transform will be included. Defaults to True.
             ee (bool, optional): If true and index ends at nth frame, then end effector transforma will be included. Defaults to True.
 
         Returns:
             np.array: 4x4 transformation matrix from the 'starting_link' to the 'ending_frame'
         """
-        if base == True and starting_link == 0:
-            T = self.base_to_first_joint
-        else:
-            T = np.eye(4) 
+        T = np.eye(4) 
 
-        for i in range(starting_link, ending_link):
+        for i in range(starting_link, ending_frame):
             T = T @ self.compute_A_matrix(q, i)
 
-        if ee == True and ending_link == NUM_JOINTS:
+        if ee == True and ending_frame == NUM_JOINTS:
             T = T @ self.compute_A_matrix(q, 3)
 
         return T
@@ -252,9 +246,8 @@ class EezyBotArm:
         t.z = T_ee[2,3]
 
         quat = Quaternion()
-        #r = scipy_R.from_matrix(T_ee[0:3, 0:3])
-        #r = r.as_quat()
-        r = np.zeros((1,4))  # FIXME
+        r = scipy_R.from_matrix(T_ee[0:3, 0:3])
+        r = r.as_quat()
         quat.x = r[0][0]
         quat.y = r[0][1]
         quat.z = r[0][2]
@@ -264,7 +257,7 @@ class EezyBotArm:
         msg_out.position = t
         msg_out.orientation = quat
 
-        self.fk_pub.publish(msg_out)
+        self.fk_publisher.publish(msg_out)
 
     def ik_callback(self, data : Vector3):
         """ROS callback for computing inverse kinematics. Subscribes to the desired position.
