@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 
 # System imports
+from numpy import DataSource
 import serial
 
 # ROS imports
 import rospy
 from rospy.exceptions import ROSInterruptException
 from std_msgs.msg import String
+from eezy_arm_ros.msg import Joints
 
 # mini UART on Raspberry Pi
 com_port = rospy.get_param("com_port", "/dev/ttyS0")
@@ -20,13 +22,22 @@ def talker():
         data = ser.read(20)  # FIXME, how many characters?
         data_str = data.decode('utf-8')
         # rospy.loginfo(data_str)
-        pub.publish(String(data_str))
+        uart_pub.publish(String(data_str))
         ser.write(data)  # Temp, for verification
+        if ',' in data_str:
+            angles_list = [int(x) for x in data_str.split(',')]
+            msg = Joints()
+            msg.q1 = angles_list[0]
+            msg.q2 = angles_list[1]
+            msg.q3 = angles_list[2]
+            qdes_pub.publish(msg)
+
 
 
 if __name__ == "__main__":
     try:
-        pub = rospy.Publisher('/uart_commands', String, queue_size=10)
+        uart_pub = rospy.Publisher('/uart_commands', String, queue_size=10)
+        qdes_pub = rospy.Publisher("q_des", Joints, queue_size=10)
         rospy.init_node('uart_control')
         talker()
     except ROSInterruptException:
