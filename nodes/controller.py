@@ -81,7 +81,9 @@ class MotorController:
             start = time()
             self.command_servos(c(ti))
             # sleep dt minus whatever it took to command the motors
-            sleep(self.dt - (time() - start))
+            diff = time() - start
+            if diff < self.dt:
+                sleep(self.dt - diff)
 
     ##################################################
     #              CALLBACK FUNCTIONS                #

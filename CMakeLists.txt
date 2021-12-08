@@ -168,6 +168,7 @@ catkin_install_python(PROGRAMS
   nodes/uart_control.py
   scripts/run_axis.py
   scripts/run_figure_eight.py
+  scripts/run_claw.py
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
