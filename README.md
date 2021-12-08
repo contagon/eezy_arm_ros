@@ -21,7 +21,7 @@ $ sudo systemctl enable pigpiod.service
 ## Setup ROS
 ```shell
 # Install necessary packages (if not already installed)
-$ sudo apt install build-essential ros-noetic-rqt --yes
+$ sudo apt install build-essential ros-noetic-rqt ros-noetic-rqt-graph --yes
 # Create and build catkin workspace
 $ mkdir -p ~/catkin_ws/src
 $ cd catkin_ws/
