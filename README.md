@@ -1,5 +1,9 @@
-# Introduction
-This package is aimed at controlling the [EEZYbotARM MK2](http://www.eezyrobots.it/eba_mk2.html) and implementing kinematic control of the robot. Initial goals are to implement forward kinematics, and inverse kinematics.
+  # Introduction
+This package is aimed at controlling the [EEZYbotARM MK2](http://www.eezyrobots.it/eba_mk2.html) and implementing kinematic control of the robot. Implemented algorithms include forward kinematics, inverse kinematics, and a spline-based trajectory generator. Furthered, a controller node has been implemented to smoothly send commands to the servos using the `gpiozero` library. All of this has been implemented in ROS for easy usage. 
+
+Here's an example of a trajectory generation of a figure 8
+
+https://user-images.githubusercontent.com/36386973/145510658-5c7a330b-1b3d-463a-999d-a5e55e9ea404.mp4
 
 This was all built on a raspberry pi running 64-bit Buster. Image can be found [here](https://downloads.raspberrypi.org/raspios_arm64/images/raspios_arm64-2021-05-28/).
 
